@@ -1,0 +1,274 @@
+{
+  "meta": {
+    "descripcion": "Motor de Reglas Ancestrales del Ecuador",
+    "version": "1.1",
+    "fuente_cultural": "Cosmovisión Andina, Amazónica, Costeña e Insular"
+  },
+  "reglas": {
+    "Kichwa": {
+      "descripcion": "Pueblo de la Sierra Andina, profundamente conectado con la Pachamama y los ciclos solares.",
+      "fases_lunares": {
+        "Luna Nueva": {
+          "Lluvia": {
+            "labores_tierra": "Descanso de la tierra. No se siembra ni cosecha. Tiempo para seleccionar semillas bajo techo.",
+            "rituales_danzas": "Rituales de purificación dentro del hogar. Sahumerio con palo santo para limpiar energías estancadas por el agua.",
+            "vestimenta": "Ponchos de lana de borrego gruesos y oscuros para mantener el calor corporal y espiritual."
+          },
+          "Despejado": {
+            "labores_tierra": "Preparación del terreno y deshierbe. La savia de las plantas está en la raíz.",
+            "rituales_danzas": "Planificación comunitaria (Minga). Observación de las estrellas para predecir heladas.",
+            "vestimenta": "Ropa de trabajo ligera, sombreros de paño para el sol frío del páramo."
+          }
+        },
+        "Luna Creciente": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de plantas de hoja y tallo aéreo. La lluvia ayuda al crecimiento inicial rápido.",
+            "rituales_danzas": "Danzas de agradecimiento al agua (Yaku). Música con flautas dulces.",
+            "vestimenta": "Capas de paja o plástico sobre el anaco/pantalón. Alpargatas con suela de caucho."
+          },
+          "Despejado": {
+            "labores_tierra": "Injertos y podas de formación. Siembra de maíz y hortalizas.",
+            "rituales_danzas": "Rituales a la fertilidad. Ceremonias de florecimiento.",
+            "vestimenta": "Colores vivos (rojos y naranjas) en fajas y chalinas representando la vitalidad."
+          }
+        },
+        "Luna Llena": {
+          "Lluvia": {
+            "labores_tierra": "Cosecha de frutos para consumo inmediato. La savia está en la parte superior.",
+            "rituales_danzas": "Reuniones familiares alrededor del fogón (Tulpa). Contar historias ancestrales.",
+            "vestimenta": "Atuendos ceremoniales protegidos. Uso de joyas de plata y coral."
+          },
+          "Despejado": {
+            "labores_tierra": "Cosecha mayor. La energía está al máximo en los frutos y hojas.",
+            "rituales_danzas": "Grandes festividades (Inti Raymi si coincide con solsticio). Zapateo fuerte para despertar a la tierra.",
+            "vestimenta": "Trajes de gala completos, zamarros, máscaras de Aya Huma."
+          }
+        },
+        "Luna Menguante": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de tubérculos (papas, zanahorias) hacia adentro de la tierra.",
+            "rituales_danzas": "Rituales de introspección y curación de enfermedades.",
+            "vestimenta": "Colores sobrios, mantas abrigadas."
+          },
+          "Despejado": {
+            "labores_tierra": "Poda de limpieza y corte de madera para construcción (dura más y no se apolilla).",
+            "rituales_danzas": "Limpias energéticas al aire libre.",
+            "vestimenta": "Ropa resistente para trabajo duro con madera y herramientas."
+          }
+        }
+      }
+    },
+    "Shuar": {
+      "descripcion": "Nacionalidad de la Amazonía, guerreros y conocedores de la selva y las cascadas.",
+      "fases_lunares": {
+        "Luna Nueva": {
+          "Lluvia": {
+            "labores_tierra": "No se trabaja la huerta (Aja). Tiempo de tejer redes y preparar veneno para pesca.",
+            "rituales_danzas": "Cantos sagrados (Anent) dentro de la casa comunal para pedir protección contra espíritus del agua.",
+            "vestimenta": "Cuerpo pintado con wituk para protección térmica y espiritual."
+          },
+          "Despejado": {
+            "labores_tierra": "Limpieza de maleza en el Aja Shuar.",
+            "rituales_danzas": "Caminatas a la cascada sagrada para baños de purificación a oscuras.",
+            "vestimenta": "Itip (falda masculina) y Tarach (vestido femenino) sencillos."
+          }
+        },
+        "Luna Creciente": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de yuca y plátano. La lluvia asienta la tierra removida.",
+            "rituales_danzas": "Ritos a Nunkui (deidad de la tierra) para que la yuca crezca grande.",
+            "vestimenta": "Adornos de semillas que suenen como lluvia al moverse."
+          },
+          "Despejado": {
+            "labores_tierra": "Recolección de plantas medicinales, la energía sube a las hojas.",
+            "rituales_danzas": "Danzas de guerra o demostración de fuerza.",
+            "vestimenta": "Coronas de plumas vistosas (Tawasap)."
+          }
+        },
+        "Luna Llena": {
+          "Lluvia": {
+            "labores_tierra": "Recolección de frutos silvestres de palmas.",
+            "rituales_danzas": "Ceremonia de la Ayahuasca (Natem) bajo techo, conexión profunda con Arutam.",
+            "vestimenta": "Pintura facial elaborada con diseños de animales de poder."
+          },
+          "Despejado": {
+            "labores_tierra": "Cacería nocturna, los animales están activos.",
+            "rituales_danzas": "Fiesta de la Chonta. Danzas comunitarias hasta el amanecer.",
+            "vestimenta": "Mejores galas, collares de shakiras y huesos."
+          }
+        },
+        "Luna Menguante": {
+          "Lluvia": {
+            "labores_tierra": "Corte de guadua y madera para casas.",
+            "rituales_danzas": "Preparación de chicha de yuca masticada.",
+            "vestimenta": "Ropa ligera de diario."
+          },
+          "Despejado": {
+            "labores_tierra": "Pesca en ríos, los peces son más visibles.",
+            "rituales_danzas": "Enseñanza de mitos a los niños.",
+            "vestimenta": "Accesorios mínimos para facilitar el movimiento en el río."
+          }
+        }
+      }
+    },
+    "Montubio": {
+      "descripcion": "Pueblo del litoral (Costa), cultura del agro, el rodeo y el amorfino.",
+      "fases_lunares": {
+        "Luna Nueva": {
+          "Lluvia": {
+            "labores_tierra": "Mantenimiento de herramientas y monturas. Cuidado del ganado en establos.",
+            "rituales_danzas": "Recitado de amorfinos picarescos bajo techo mientras llueve.",
+            "vestimenta": "Botas de caucho altas, pantalón remangado."
+          },
+          "Despejado": {
+            "labores_tierra": "Quema de maleza (roza) controlada para preparar siembra.",
+            "rituales_danzas": "Peleas de gallos (tradición cultural arraigada).",
+            "vestimenta": "Camisa blanca ligera, sombrero de paja toquilla."
+          }
+        },
+        "Luna Creciente": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de arroz en zonas inundables (pozas).",
+            "rituales_danzas": "Cantos de vaquería para calmar al ganado nervioso por la tormenta.",
+            "vestimenta": "Ropa vieja de trabajo, protección impermeable básica."
+          },
+          "Despejado": {
+            "labores_tierra": "Siembra de cacao y café. Poda de árboles frutales.",
+            "rituales_danzas": "Bailes de salón montubio, polcas y pasacalles.",
+            "vestimenta": "Vestidos coloridos y amplios para las mujeres, guayabera para hombres."
+          }
+        },
+        "Luna Llena": {
+          "Lluvia": {
+            "labores_tierra": "Vigilancia de los cultivos y el nivel del agua.",
+            "rituales_danzas": "Leyendas de miedo (La Tunda, El Duende) contadas en familia.",
+            "vestimenta": "Ropa cómoda de algodón."
+          },
+          "Despejado": {
+            "labores_tierra": "Cosecha de cacao fino de aroma. La luna ilumina el tendal.",
+            "rituales_danzas": "Rodeo Montubio. Doma de potros y lazos.",
+            "vestimenta": "Traje impecable, sombrero fino, pañuelo rojo al cuello, machete envainado al cinto."
+          }
+        },
+        "Luna Menguante": {
+          "Lluvia": {
+            "labores_tierra": "Corte de caña guadua y madera para cercas (no se pica).",
+            "rituales_danzas": "Curación de animales con hierbas y secretos.",
+            "vestimenta": "Ropa resistente a rasgaduras."
+          },
+          "Despejado": {
+            "labores_tierra": "Castra de colmenas o ganado. Cosecha de plátano verde.",
+            "rituales_danzas": "Juegos tradicionales y competencias de habilidades.",
+            "vestimenta": "Sombrero de ala ancha para el sol fuerte."
+          }
+        }
+      }
+    },
+    "Afroecuatoriano": {
+      "descripcion": "Pueblo de la Costa Norte (Esmeraldas) y Valle del Chota, cultura de la marimba, el tambor y la pesca.",
+      "fases_lunares": {
+        "Luna Nueva": {
+          "Lluvia": {
+            "labores_tierra": "No se sale a pescar en alta mar (aguaje fuerte). Reparación de redes y atarrayas.",
+            "rituales_danzas": "Arrullos a los santos dentro de casa para pedir protección.",
+            "vestimenta": "Ropa blanca sencilla para atraer pureza."
+          },
+          "Despejado": {
+            "labores_tierra": "Recolección de conchas en el manglar (la marea baja descubre las raíces).",
+            "rituales_danzas": "Construcción de instrumentos musicales (bombos y cununos).",
+            "vestimenta": "Pantalones remangados para caminar en el lodo del manglar."
+          }
+        },
+        "Luna Creciente": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de coco y plátano verde.",
+            "rituales_danzas": "Cantos de alabao (si hay difuntos) o chigualos (para niños).",
+            "vestimenta": "Sombreros de paja para protegerse de la llovizna."
+          },
+          "Despejado": {
+            "labores_tierra": "Cosecha de frutas tropicales.",
+            "rituales_danzas": "Ensayos de marimba al aire libre.",
+            "vestimenta": "Faldas amplias y coloridas para las mujeres, camisas abiertas para hombres."
+          }
+        },
+        "Luna Llena": {
+          "Lluvia": {
+            "labores_tierra": "Pesca de camarón de río que sale con la crecida.",
+            "rituales_danzas": "Historias de la Tunda para que los niños no salgan bajo la lluvia.",
+            "vestimenta": "Ropa ligera de secado rápido."
+          },
+          "Despejado": {
+            "labores_tierra": "Pesca nocturna en el mar, los peces suben a la superficie.",
+            "rituales_danzas": "Fiesta grande de Marimba, currulao y baile toda la noche.",
+            "vestimenta": "Trajes tradicionales blancos con pañuelos de colores vivos."
+          }
+        },
+        "Luna Menguante": {
+          "Lluvia": {
+            "labores_tierra": "Corte de madera de chonta y guayacán.",
+            "rituales_danzas": "Limpieza espiritual con hierbas amargas.",
+            "vestimenta": "Ropa de faena resistente."
+          },
+          "Despejado": {
+            "labores_tierra": "Siembra de yuca y camote.",
+            "rituales_danzas": "Juegos de caña y destreza física.",
+            "vestimenta": "Torso descubierto o camisetas ligeras por el calor."
+          }
+        }
+      }
+    },
+    "Galapagueño": {
+      "descripcion": "Cultura insular de conservación, convivencia con especies únicas y vida marina.",
+      "fases_lunares": {
+        "Luna Nueva": {
+          "Lluvia": {
+            "labores_tierra": "Recolección de agua dulce (recurso escaso). Mantenimiento de cisternas.",
+            "rituales_danzas": "Charlas comunitarias sobre conservación.",
+            "vestimenta": "Impermeables ligeros y sandalias antideslizantes."
+          },
+          "Despejado": {
+            "labores_tierra": "Control de especies invasoras en las fincas (mora, guayaba).",
+            "rituales_danzas": "Observación astronómica (cielos muy oscuros).",
+            "vestimenta": "Ropa con protección UV, gafas de sol."
+          }
+        },
+        "Luna Creciente": {
+          "Lluvia": {
+            "labores_tierra": "Siembra de café de Galápagos en la parte alta.",
+            "rituales_danzas": "Arte y fotografía de la naturaleza renaciente.",
+            "vestimenta": "Botas de caucho para el lodo volcánico."
+          },
+          "Despejado": {
+            "labores_tierra": "Pesca vivencial sustentable.",
+            "rituales_danzas": "Festivales de comida del mar.",
+            "vestimenta": "Ropa casual de playa, shorts y camisetas de algodón."
+          }
+        },
+        "Luna Llena": {
+          "Lluvia": {
+            "labores_tierra": "Monitoreo de tortugas gigantes en su migración.",
+            "rituales_danzas": "Lectura y poesía sobre las islas encantadas.",
+            "vestimenta": "Ropa cómoda para estar en casa."
+          },
+          "Despejado": {
+            "labores_tierra": "Pesca de langosta (en temporada). Actividades turísticas nocturnas.",
+            "rituales_danzas": "Fogatas en áreas permitidas (playa).",
+            "vestimenta": "Trajes de baño y pareos."
+          }
+        },
+        "Luna Menguante": {
+          "Lluvia": {
+            "labores_tierra": "Poda de cafetales.",
+            "rituales_danzas": "Yoga o meditación frente al mar.",
+            "vestimenta": "Ropa deportiva."
+          },
+          "Despejado": {
+            "labores_tierra": "Mantenimiento de embarcaciones (pangas).",
+            "rituales_danzas": "Triatlones locales o competencias de natación.",
+            "vestimenta": "Neopreno o licras para el agua."
+          }
+        }
+      }
+    }
+  }
+}

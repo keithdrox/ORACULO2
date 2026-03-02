@@ -1,0 +1,348 @@
+:root {
+    --primary-color: #ffd700; /* Dorado ancestral */
+    --secondary-color: #00bfff; /* Azul cielo/agua */
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-light: #f8fafc;
+    --text-dim: #94a3b8;
+    --sheet-bg: rgba(15, 23, 42, 0.95);
+    --error-color: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Evitar scroll en el body */
+    background: #0f172a;
+    color: var(--text-light);
+    height: 100vh;
+    width: 100vw;
+}
+
+/* --- MAPA DE FONDO --- */
+#map-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* --- CAPA DE INTERFAZ (UI) --- */
+.ui-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none; /* Permitir clics en el mapa a través de la UI */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* --- BARRA SUPERIOR --- */
+.top-bar {
+    pointer-events: auto; /* Reactivar clics */
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin: 0;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.compact-select {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5px 10px;
+}
+
+.compact-select i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+select {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    font-size: 1rem;
+    outline: none;
+}
+
+select option {
+    background: var(--bg-dark);
+    color: white;
+}
+
+/* --- BARRA INFERIOR DE ACCIÓN --- */
+.bottom-action-bar {
+    pointer-events: auto;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px; /* Espacio para el mapa */
+}
+
+.location-info {
+    display: flex;
+    align-items: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.location-info i {
+    color: var(--secondary-color);
+    margin-right: 8px;
+}
+
+#btn-consultar {
+    background: var(--primary-color);
+    color: var(--bg-dark);
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    width: 100%;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#btn-consultar:disabled {
+    background: #475569;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+#btn-consultar:active {
+    transform: scale(0.98);
+}
+
+/* --- BOTTOM SHEET (RESULTADOS) --- */
+.bottom-sheet {
+    pointer-events: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 85vh; /* Ocupa casi toda la pantalla */
+    background: var(--sheet-bg);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+    transform: translateY(100%); /* Oculto abajo */
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto; /* Scroll interno */
+}
+
+.bottom-sheet.active {
+    transform: translateY(0);
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    margin: 0 auto 15px;
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sheet-header h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* --- CONTENIDO DE LA HOJA --- */
+.weather-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    gap: 10px;
+}
+
+.weather-pill {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.card-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.green { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+.red { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+.blue { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
+.orange { background: rgba(251, 146, 60, 0.2); color: #fb923c; } /* Gastronomía */
+.purple { background: rgba(192, 132, 252, 0.2); color: #c084fc; } /* Medicina */
+
+.card-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    color: var(--text-light);
+}
+
+.card-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+/* --- LOADING OVERLAY --- */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- INFO PANEL --- */
+#info-panel {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.95);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--primary-color);
+    z-index: 50;
+    pointer-events: auto;
+}
+
+#info-panel p {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+#btn-close-info {
+    width: auto;
+    padding: 8px 20px;
+    margin-top: 0;
+}
+
+/* --- TOAST NOTIFICATION (NUEVO) --- */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: rgba(239, 68, 68, 0.9); /* Rojo error */
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 300;
+    left: 50%;
+    bottom: 100px; /* Encima de la barra inferior */
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s;
+}
+
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 110px; /* Pequeña animación hacia arriba */
+}

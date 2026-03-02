@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oráculo Ancestral</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <!-- EL MAPA ES EL FONDO AHORA -->
+    <div id="map-background"></div>
+
+    <!-- CAPA DE INTERFAZ (UI) -->
+    <div class="ui-container">
+
+        <!-- BARRA SUPERIOR FLOTANTE -->
+        <div class="top-bar glass-panel">
+            <div class="header-content">
+                <h1>Oráculo Ancestral</h1>
+                <button id="btn-info" class="icon-btn"><i class="fas fa-info-circle"></i></button>
+            </div>
+
+            <!-- Selector de Nacionalidad (Siempre visible) -->
+            <div class="compact-select">
+                <i class="fas fa-users"></i>
+                <select id="nacionalidad">
+                    <option value="" disabled selected>Elige Cosmovisión...</option>
+                    <option value="Kichwa">Kichwa (Sierra)</option>
+                    <option value="Shuar">Shuar (Amazonía)</option>
+                    <option value="Montubio">Montubio (Costa)</option>
+                    <option value="Afroecuatoriano">Afroecuatoriano</option>
+                    <option value="Galapagueño">Galapagueño</option>
+                    <option value="Tsáchila">Tsáchila (Sto. Domingo)</option>
+                    <option value="Waorani">Waorani (Amazonía)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- PANEL DE INFORMACIÓN (Oculto por defecto) -->
+        <div id="info-panel" class="glass-panel hidden">
+            <p class="highlight">"El clima es el mismo para todos, pero la cultura decide qué hacer con él."</p>
+            <p>Toca el mapa para seleccionar un lugar y descubre la sabiduría ancestral.</p>
+            <button id="btn-close-info">Entendido</button>
+        </div>
+
+        <!-- BARRA INFERIOR DE ACCIÓN -->
+        <div class="bottom-action-bar glass-panel">
+            <div class="location-info">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="selected-location">Toca el mapa para empezar</span>
+            </div>
+
+            <!-- Selectores ocultos (fallback) -->
+            <div style="display:none;">
+                <select id="provincia"></select>
+                <select id="canton"></select>
+            </div>
+
+            <button id="btn-consultar" disabled>
+                CONSULTAR ORÁCULO
+            </button>
+        </div>
+
+        <!-- HOJA DE RESULTADOS (BOTTOM SHEET) -->
+        <div id="results-sheet" class="bottom-sheet">
+            <div class="sheet-handle"></div>
+
+            <div class="sheet-header">
+                <h2 id="titulo-sabiduria">Sabiduría Ancestral</h2>
+                <button id="btn-close-sheet" class="icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="sheet-content">
+                <!-- Clima Compacto -->
+                <div class="weather-row">
+                    <div class="weather-pill">
+                        <span id="res-temp">--°C</span>
+                    </div>
+                    <div class="weather-pill">
+                        <span id="res-cond">--</span>
+                    </div>
+                    <div class="weather-pill">
+                        <span id="res-luna">--</span>
+                    </div>
+                </div>
+
+                <!-- Tarjetas -->
+                <div class="cards-list">
+                    <div class="card-item">
+                        <div class="card-icon-box green"><i class="fas fa-seedling"></i></div>
+                        <div class="card-text">
+                            <h3>Labores de Tierra</h3>
+                            <p id="card-labores">...</p>
+                        </div>
+                    </div>
+
+                    <div class="card-item">
+                        <div class="card-icon-box red"><i class="fas fa-fire"></i></div>
+                        <div class="card-text">
+                            <h3>Rituales y Danzas</h3>
+                            <p id="card-rituales">...</p>
+                        </div>
+                    </div>
+
+                    <div class="card-item">
+                        <div class="card-icon-box blue"><i class="fas fa-tshirt"></i></div>
+                        <div class="card-text">
+                            <h3>Vestimenta</h3>
+                            <p id="card-vestimenta">...</p>
+                        </div>
+                    </div>
+
+                    <!-- NUEVAS TARJETAS -->
+                    <div class="card-item">
+                        <div class="card-icon-box orange"><i class="fas fa-utensils"></i></div>
+                        <div class="card-text">
+                            <h3>Gastronomía</h3>
+                            <p id="card-gastronomia">...</p>
+                        </div>
+                    </div>
+
+                    <div class="card-item">
+                        <div class="card-icon-box purple"><i class="fas fa-heartbeat"></i></div>
+                        <div class="card-text">
+                            <h3>Medicina Natural</h3>
+                            <p id="card-medicina">...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading" class="loading-overlay hidden">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p>Consultando a los astros...</p>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast">Mensaje de error</div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="lugares.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
