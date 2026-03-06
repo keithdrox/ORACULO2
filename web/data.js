@@ -232,6 +232,13 @@ const REGLAS_ANCESTRALES = {
           "vestimenta": "Sombreros de paja.",
           "gastronomia": "Bala de verde (majado).",
           "medicina": "Verbena para bajar fiebre."
+        },
+        "Despejado": {
+          "labores_tierra": "Tejido de redes al sol.",
+          "rituales_danzas": "Ensayos de marimba al atardecer.",
+          "vestimenta": "Ropa fresca y turbantes.",
+          "gastronomia": "Corviche de pescado.",
+          "medicina": "Mate de Toronjil para calmar el cuerpo."
         }
       },
       "Luna Llena": {
@@ -294,6 +301,13 @@ const REGLAS_ANCESTRALES = {
           "vestimenta": "Botas de caucho.",
           "gastronomia": "Pescado brujo frito.",
           "medicina": "Descanso e hidratación."
+        },
+        "Despejado": {
+          "labores_tierra": "Revisión de nidos de iguanas.",
+          "rituales_danzas": "Buceo en aguas claras.",
+          "vestimenta": "Trajes de baño y protección UV.",
+          "gastronomia": "Ceviche de pulpo.",
+          "medicina": "Aloe Vera fresca para la piel."
         }
       },
       "Luna Llena": {
@@ -356,6 +370,13 @@ const REGLAS_ANCESTRALES = {
           "vestimenta": "Collares de semillas (Win).",
           "gastronomia": "Sopa de bolas de verde.",
           "medicina": "Hierbas amargas para purgar."
+        },
+        "Despejado": {
+          "labores_tierra": "Secado de granos al sol.",
+          "rituales_danzas": "Limpias energéticas matutinas.",
+          "vestimenta": "Pintura ritual brillante con achiote fresco.",
+          "gastronomia": "Maito de chontacuro.",
+          "medicina": "Baños aromáticos con albahaca."
         }
       },
       "Luna Llena": {
@@ -418,6 +439,13 @@ const REGLAS_ANCESTRALES = {
           "vestimenta": "Pintura roja de achiote.",
           "gastronomia": "Chucula (bebida de plátano).",
           "medicina": "Corteza de árbol para dolor de estómago."
+        },
+        "Despejado": {
+          "labores_tierra": "Recolección de miel silvestre.",
+          "rituales_danzas": "Imitación de cantos de aves y animales.",
+          "vestimenta": "Adornos de cuarzo y semillas.",
+          "gastronomia": "Pescado asado en hojas de plátano.",
+          "medicina": "Aplicación de resinas cicatrizantes."
         }
       },
       "Luna Llena": {
