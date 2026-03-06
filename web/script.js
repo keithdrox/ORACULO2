@@ -11,10 +11,10 @@ const ICONOS_LUNARES = {
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
-    
+
     document.getElementById('nacionalidad').addEventListener('change', validarFormulario);
     document.getElementById('btn-consultar').addEventListener('click', consultarOraculo);
-    
+
     document.getElementById('btn-info').addEventListener('click', toggleInfo);
     document.getElementById('btn-close-info').addEventListener('click', toggleInfo);
     document.getElementById('btn-close-sheet').addEventListener('click', cerrarResultados);
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function inicializarMapa() {
     const bounds = L.latLngBounds(
-        L.latLng(-6.0, -92.0), 
+        L.latLng(-6.0, -92.0),
         L.latLng(2.5, -75.0)
     );
 
@@ -47,7 +47,7 @@ async function seleccionarLugarPorCoordenadas(e) {
     const lon = e.latlng.lng;
 
     document.getElementById('selected-location').textContent = "Verificando ubicación...";
-    
+
     try {
         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
         const data = await response.json();
@@ -67,13 +67,13 @@ async function seleccionarLugarPorCoordenadas(e) {
             marker = L.marker([lat, lon]).addTo(map);
 
             const ciudad = data.address.city || data.address.town || data.address.village || data.address.county || "Ubicación rural";
-            
+
             document.getElementById('selected-location').textContent = ciudad;
             marker.bindPopup(`<b>${ciudad}</b>`).openPopup();
-            
+
             const btn = document.getElementById('btn-consultar');
             btn.dataset.ciudad = ciudad;
-            
+
             validarFormulario();
         } else {
             showToast("⚠️ No se pudo identificar el lugar. Intenta en tierra firme.");
@@ -90,7 +90,7 @@ function showToast(message) {
     toast.className = "show";
     toast.style.visibility = "visible";
     toast.style.opacity = "1";
-    setTimeout(function(){ 
+    setTimeout(function () {
         toast.className = toast.className.replace("show", "");
         toast.style.visibility = "hidden";
         toast.style.opacity = "0";
@@ -122,7 +122,7 @@ async function consultarOraculo() {
         const climaData = await obtenerClima(ciudad);
         const faseLunar = calcularFaseLunar(new Date());
         const recomendacion = obtenerRecomendacion(nacionalidad, faseLunar, climaData.condicion);
-        
+
         actualizarFondoDinamico(climaData);
         mostrarResultados(climaData, faseLunar, recomendacion, nacionalidad);
 
@@ -145,7 +145,7 @@ function mostrarResultados(clima, fase, recomendacion, nacionalidad) {
     document.getElementById('card-labores').textContent = recomendacion.labores_tierra;
     document.getElementById('card-rituales').textContent = recomendacion.rituales_danzas;
     document.getElementById('card-vestimenta').textContent = recomendacion.vestimenta;
-    
+
     // --- NUEVO: Llenar Gastronomía y Medicina ---
     document.getElementById('card-gastronomia').textContent = recomendacion.gastronomia || "No disponible";
     document.getElementById('card-medicina').textContent = recomendacion.medicina || "No disponible";
@@ -223,7 +223,7 @@ async function obtenerClima(ciudadOriginal) {
 function calcularFaseLunar(date) {
     const knownNewMoon = new Date('2024-01-11');
     const diffTime = Math.abs(date - knownNewMoon);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const lunarCycle = 29.53;
     let currentCycleDay = diffDays % lunarCycle;
     if (currentCycleDay < 1.8) return "Luna Nueva";
@@ -250,6 +250,124 @@ function obtenerRecomendacion(nacionalidad, fase, condicion) {
     }
 }
 
+// Referencia a los drops para poder limpiarlos
+let raindrops = [];
+
 function actualizarFondoDinamico(clima) {
-    // Placeholder
+    console.log('🌦️ actualizarFondoDinamico llamada con:', clima);
+
+    const overlay = document.getElementById('climate-overlay');
+    const rainBox = document.getElementById('rain-container');
+    const badge = document.getElementById('climate-badge');
+    const mapDiv = document.getElementById('map-background');
+
+    if (!overlay || !rainBox || !badge || !mapDiv) {
+        console.error('❌ Faltan elementos del DOM para el fondo dinámico:', { overlay, rainBox, badge, mapDiv });
+        return;
+    }
+
+    // Limpiar estado anterior
+    overlay.className = '';
+    badge.className = '';
+    rainBox.classList.remove('active');
+    raindrops.forEach(d => d.remove());
+    raindrops = [];
+
+    // Determinar si es de noche usando el código de icono de OWM ('01n', '10n', etc.)
+    const esNoche = clima.icon && clima.icon.endsWith('n');
+
+    let claseOverlay, filtroMapa, badgeTexto, esLluvia = false;
+
+    switch (clima.condicion) {
+        case 'Lluvia':
+            if (clima.desc && (clima.desc.includes('tormenta') || clima.desc.includes('thunder'))) {
+                claseOverlay = 'storm';
+                filtroMapa = 'brightness(0.45) saturate(0.5) hue-rotate(210deg)';
+                badgeTexto = '⛈️ Tormenta';
+            } else {
+                claseOverlay = 'rain';
+                filtroMapa = 'brightness(0.55) saturate(0.6) hue-rotate(190deg)';
+                badgeTexto = '🌧️ Lluvia';
+            }
+            esLluvia = true;
+            break;
+
+        case 'Despejado':
+            // Las reglas del JSON agrupan todo en Despejado o Lluvia,
+            // pero visualmente queremos diferenciar si está nublado.
+            const esNublado = clima.desc && (clima.desc.includes('nuboso') || clima.desc.includes('nubes') || clima.desc.includes('nublado'));
+            const iconoNublado = clima.icon && (clima.icon.startsWith('02') || clima.icon.startsWith('03') || clima.icon.startsWith('04'));
+
+            if (esNublado || iconoNublado) {
+                claseOverlay = 'clouds';
+                filtroMapa = esNoche
+                    ? 'brightness(0.45) saturate(0.5)'
+                    : 'brightness(0.75) saturate(0.65)';
+                badgeTexto = esNoche ? '🌑 Noche nublada' : '☁️ Nublado';
+            } else {
+                if (esNoche) {
+                    claseOverlay = 'clear-night';
+                    filtroMapa = 'brightness(0.45) saturate(0.4)';
+                    badgeTexto = '🌙 Noche despejada';
+                } else {
+                    claseOverlay = 'clear-day';
+                    filtroMapa = 'brightness(1.15) saturate(1.25) sepia(0.1)';
+                    badgeTexto = '☀️ Día despejado';
+                }
+            }
+            break;
+
+        default:
+            claseOverlay = 'clouds';
+            filtroMapa = esNoche
+                ? 'brightness(0.45) saturate(0.5)'
+                : 'brightness(0.75) saturate(0.65)';
+            badgeTexto = esNoche ? '🌑 Noche nublada' : '☁️ Nublado';
+    }
+
+    // 1. Filtro al mapa
+    mapDiv.style.filter = filtroMapa;
+    console.log('🗺️ Filtro mapa aplicado:', filtroMapa);
+
+    // 2. Overlay de color
+    overlay.classList.add(claseOverlay);
+    console.log('🎨 Clase overlay aplicada:', claseOverlay);
+
+    // 3. Badge
+    badge.textContent = badgeTexto;
+    badge.classList.add(claseOverlay, 'visible');
+    console.log('🏷️ Badge:', badgeTexto);
+
+    // 4. Lluvia
+    if (esLluvia) {
+        const cantidad = claseOverlay === 'storm' ? 120 : 70;
+        generarLluvia(rainBox, cantidad);
+        console.log('🌧️ Lluvia generada:', cantidad, 'gotas');
+    }
 }
+
+function generarLluvia(contenedor, cantidad) {
+    contenedor.classList.add('active');
+    for (let i = 0; i < cantidad; i++) {
+        const drop = document.createElement('div');
+        drop.classList.add('raindrop');
+
+        const leftPct = Math.random() * 100;
+        const height = Math.random() * 70 + 40;
+        const duration = Math.random() * 0.8 + 0.4;
+        const delay = Math.random() * 2;
+        const opacity = Math.random() * 0.4 + 0.5; // más opaco: 0.5-0.9
+
+        drop.style.cssText = `
+            left: ${leftPct}%;
+            height: ${height}px;
+            animation-duration: ${duration}s;
+            animation-delay: -${delay}s;
+            opacity: ${opacity};
+        `;
+
+        contenedor.appendChild(drop);
+        raindrops.push(drop);
+    }
+}
+

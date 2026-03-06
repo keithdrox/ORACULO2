@@ -1,12 +1,15 @@
 :root {
-    --primary-color: #ffd700; /* Dorado ancestral */
-    --secondary-color: #00bfff; /* Azul cielo/agua */
+    --primary-color: #ffd700;
+    /* Dorado ancestral */
+    --secondary-color: #00bfff;
+    /* Azul cielo/agua */
     --bg-dark: #0f172a;
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
     --text-light: #f8fafc;
     --text-dim: #94a3b8;
-    --sheet-bg: rgba(15, 23, 42, 0.95);
+    --sheet-bg: rgba(15, 23, 42, 0.75);
+    /* Más transparente */
     --error-color: #ef4444;
 }
 
@@ -20,7 +23,8 @@
 body {
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Evitar scroll en el body */
+    overflow: hidden;
+    /* Evitar scroll en el body */
     background: #0f172a;
     color: var(--text-light);
     height: 100vh;
@@ -35,6 +39,142 @@ body {
     width: 100%;
     height: 100%;
     z-index: 0;
+    transition: filter 1.2s ease-in-out;
+}
+
+/* --- OVERLAY DINÁMICO DE CLIMA --- */
+#climate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out, background 1.5s ease-in-out;
+}
+
+#climate-overlay.rain {
+    background: linear-gradient(180deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.3) 100%);
+    opacity: 1;
+}
+
+#climate-overlay.storm {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 27, 75, 0.4) 100%);
+    opacity: 1;
+}
+
+#climate-overlay.clear-day {
+    background: linear-gradient(180deg, rgba(254, 215, 0, 0.08) 0%, rgba(251, 146, 60, 0.05) 100%);
+    opacity: 1;
+}
+
+#climate-overlay.clear-night {
+    background: linear-gradient(180deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 23, 42, 0.2) 100%);
+    opacity: 1;
+}
+
+#climate-overlay.clouds {
+    background: linear-gradient(180deg, rgba(71, 85, 105, 0.35) 0%, rgba(15, 23, 42, 0.2) 100%);
+    opacity: 1;
+}
+
+/* --- ANIMACIÓN DE GOTAS DE LLUVIA --- */
+#rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+    /* POR ENCIMA DE TODO */
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+#rain-container.active {
+    opacity: 1;
+}
+
+.raindrop {
+    position: absolute;
+    top: -20px;
+    width: 2px;
+    /* Más gruesa */
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.8));
+    /* Más brillante */
+    border-radius: 0 0 2px 2px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: translateY(110vh);
+        opacity: 0;
+    }
+}
+
+/* --- BADGE DE CLIMA ACTIVO --- */
+#climate-badge {
+    position: fixed;
+    top: 20px;
+    /* Subir para que no choque con nada */
+    right: 60px;
+    /* Mover a la izquierda del botón info */
+    z-index: 160;
+    /* El nivel más alto */
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-light);
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+}
+
+#climate-badge.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#climate-badge.rain {
+    background: rgba(30, 58, 138, 0.75);
+}
+
+#climate-badge.storm {
+    background: rgba(55, 48, 163, 0.8);
+}
+
+#climate-badge.clouds {
+    background: rgba(71, 85, 105, 0.75);
+}
+
+#climate-badge.clear-day {
+    background: rgba(180, 130, 0, 0.75);
+}
+
+#climate-badge.clear-night {
+    background: rgba(30, 27, 75, 0.85);
 }
 
 /* --- CAPA DE INTERFAZ (UI) --- */
@@ -45,7 +185,8 @@ body {
     width: 100%;
     height: 100%;
     z-index: 10;
-    pointer-events: none; /* Permitir clics en el mapa a través de la UI */
+    pointer-events: none;
+    /* Permitir clics en el mapa a través de la UI */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -54,13 +195,14 @@ body {
 
 /* --- BARRA SUPERIOR --- */
 .top-bar {
-    pointer-events: auto; /* Reactivar clics */
+    pointer-events: auto;
+    /* Reactivar clics */
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 15px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -122,11 +264,12 @@ select option {
     border-radius: 15px;
     padding: 15px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 20px; /* Espacio para el mapa */
+    margin-bottom: 20px;
+    /* Espacio para el mapa */
 }
 
 .location-info {
@@ -173,18 +316,23 @@ select option {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 85vh; /* Ocupa casi toda la pantalla */
+    height: 85vh;
+    /* Ocupa casi toda la pantalla */
     background: var(--sheet-bg);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-    transform: translateY(100%); /* Oculto abajo */
+    box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.8);
+    transform: translateY(100%);
+    /* Oculto abajo */
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 100;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    overflow-y: auto; /* Scroll interno */
+    overflow-y: auto;
+    /* Scroll interno */
+    backdrop-filter: blur(4px);
+    /* Menos desenfoque para ver el fondo */
 }
 
 .bottom-sheet.active {
@@ -257,11 +405,33 @@ select option {
     flex-shrink: 0;
 }
 
-.green { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
-.red { background: rgba(248, 113, 113, 0.2); color: #f87171; }
-.blue { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
-.orange { background: rgba(251, 146, 60, 0.2); color: #fb923c; } /* Gastronomía */
-.purple { background: rgba(192, 132, 252, 0.2); color: #c084fc; } /* Medicina */
+.green {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+}
+
+.red {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+}
+
+.blue {
+    background: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+}
+
+.orange {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+}
+
+/* Gastronomía */
+.purple {
+    background: rgba(192, 132, 252, 0.2);
+    color: #c084fc;
+}
+
+/* Medicina */
 
 .card-text h3 {
     margin: 0 0 5px 0;
@@ -325,7 +495,8 @@ select option {
 #toast {
     visibility: hidden;
     min-width: 250px;
-    background-color: rgba(239, 68, 68, 0.9); /* Rojo error */
+    background-color: rgba(239, 68, 68, 0.9);
+    /* Rojo error */
     color: #fff;
     text-align: center;
     border-radius: 8px;
@@ -333,10 +504,11 @@ select option {
     position: fixed;
     z-index: 300;
     left: 50%;
-    bottom: 100px; /* Encima de la barra inferior */
+    bottom: 100px;
+    /* Encima de la barra inferior */
     transform: translateX(-50%);
     font-size: 0.9rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     opacity: 0;
     transition: opacity 0.3s, bottom 0.3s;
 }
@@ -344,5 +516,6 @@ select option {
 #toast.show {
     visibility: visible;
     opacity: 1;
-    bottom: 110px; /* Pequeña animación hacia arriba */
+    bottom: 110px;
+    /* Pequeña animación hacia arriba */
 }
