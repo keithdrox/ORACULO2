@@ -12,7 +12,10 @@ const ICONOS_LUNARES = {
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
 
-    document.getElementById('nacionalidad').addEventListener('change', validarFormulario);
+    document.getElementById('nacionalidad').addEventListener('change', (e) => {
+        validarFormulario();
+        actualizarDescripcionCosmovision(e.target.value);
+    });
     document.getElementById('btn-consultar').addEventListener('click', consultarOraculo);
 
     document.getElementById('btn-info').addEventListener('click', toggleInfo);
@@ -111,6 +114,18 @@ function validarFormulario() {
     }
 }
 
+function actualizarDescripcionCosmovision(nacionalidad) {
+    const descContainer = document.getElementById('cosmovision-desc-container');
+    const descText = document.getElementById('cosmovision-desc');
+
+    if (nacionalidad && REGLAS_ANCESTRALES[nacionalidad]) {
+        descText.textContent = `"${REGLAS_ANCESTRALES[nacionalidad].descripcion}"`;
+        descContainer.classList.remove('hidden');
+    } else {
+        descContainer.classList.add('hidden');
+    }
+}
+
 async function consultarOraculo() {
     const ciudad = document.getElementById('btn-consultar').dataset.ciudad;
     const nacionalidad = document.getElementById('nacionalidad').value;
@@ -120,11 +135,11 @@ async function consultarOraculo() {
 
     try {
         const climaData = await obtenerClima(ciudad);
-        const faseLunar = calcularFaseLunar(new Date());
-        const recomendacion = obtenerRecomendacion(nacionalidad, faseLunar, climaData.condicion);
+        const datosLunares = calcularFaseLunar(new Date());
+        const recomendacion = obtenerRecomendacion(nacionalidad, datosLunares.faseActual, climaData.condicion);
 
         actualizarFondoDinamico(climaData);
-        mostrarResultados(climaData, faseLunar, recomendacion, nacionalidad);
+        mostrarResultados(climaData, datosLunares, recomendacion, nacionalidad);
 
     } catch (error) {
         console.error("Error detallado:", error);
@@ -134,13 +149,20 @@ async function consultarOraculo() {
     }
 }
 
-function mostrarResultados(clima, fase, recomendacion, nacionalidad) {
+function mostrarResultados(clima, datosLunares, recomendacion, nacionalidad) {
     const tempText = clima.esSimulado ? `${clima.temp}°C (Sim)` : `${clima.temp.toFixed(1)}°C`;
-    const faseLunarConIcono = `${ICONOS_LUNARES[fase] || ''} ${fase}`;
+    const faseLunarConIcono = `${ICONOS_LUNARES[datosLunares.faseActual] || ''} ${datosLunares.faseActual}`;
+    const detalleFase = `Faltan ${datosLunares.diasRestantes} días para ${datosLunares.proximaFase}`;
 
     document.getElementById('res-temp').textContent = tempText;
     document.getElementById('res-cond').textContent = clima.desc.charAt(0).toUpperCase() + clima.desc.slice(1);
+    
+    // Asignar fase y detalle
     document.getElementById('res-luna').textContent = faseLunarConIcono;
+    const elemDetalleLuna = document.getElementById('res-luna-detalle');
+    if(elemDetalleLuna) {
+        elemDetalleLuna.textContent = detalleFase;
+    }
 
     document.getElementById('card-labores').textContent = recomendacion.labores_tierra;
     document.getElementById('card-rituales').textContent = recomendacion.rituales_danzas;
@@ -226,11 +248,44 @@ function calcularFaseLunar(date) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const lunarCycle = 29.53;
     let currentCycleDay = diffDays % lunarCycle;
-    if (currentCycleDay < 1.8) return "Luna Nueva";
-    if (currentCycleDay < 9.2) return "Luna Creciente";
-    if (currentCycleDay < 16.6) return "Luna Llena";
-    if (currentCycleDay < 24.0) return "Luna Menguante";
-    return "Luna Nueva";
+    
+    // Umbrales de fases en días dentro del ciclo de 29.53
+    const UMBRAL_NUEVA = 1.8;
+    const UMBRAL_CRECIENTE = 9.2;
+    const UMBRAL_LLENA = 16.6;
+    const UMBRAL_MENGUANTE = 24.0;
+    
+    let faseActual = "Luna Nueva";
+    let proximaFase = "";
+    let diasRestantes = 0;
+
+    if (currentCycleDay < UMBRAL_NUEVA) {
+        faseActual = "Luna Nueva";
+        proximaFase = "Luna Creciente";
+        diasRestantes = Math.ceil(UMBRAL_NUEVA - currentCycleDay);
+    } else if (currentCycleDay < UMBRAL_CRECIENTE) {
+        faseActual = "Luna Creciente";
+        proximaFase = "Luna Llena";
+        diasRestantes = Math.ceil(UMBRAL_CRECIENTE - currentCycleDay);
+    } else if (currentCycleDay < UMBRAL_LLENA) {
+        faseActual = "Luna Llena";
+        proximaFase = "Luna Menguante";
+        diasRestantes = Math.ceil(UMBRAL_LLENA - currentCycleDay);
+    } else if (currentCycleDay < UMBRAL_MENGUANTE) {
+        faseActual = "Luna Menguante";
+        proximaFase = "Luna Nueva";
+        diasRestantes = Math.ceil(UMBRAL_MENGUANTE - currentCycleDay);
+    } else {
+        faseActual = "Luna Nueva";
+        proximaFase = "Luna Creciente";
+        diasRestantes = Math.ceil(lunarCycle - currentCycleDay + UMBRAL_NUEVA);
+    }
+
+    return {
+        faseActual: faseActual,
+        proximaFase: proximaFase,
+        diasRestantes: diasRestantes === 0 ? 1 : diasRestantes // Evitar decir "Faltan 0 días"
+    };
 }
 
 function obtenerRecomendacion(nacionalidad, fase, condicion) {
