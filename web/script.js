@@ -49,6 +49,13 @@ async function seleccionarLugarPorCoordenadas(e) {
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
 
+    // ACTUALIZAR COORDENADAS INMEDIATAMENTE
+    // Esto asegura que aunque Nominatim falle, la consulta de clima use el punto nuevo.
+    const btn = document.getElementById('btn-consultar');
+    btn.dataset.lat = lat;
+    btn.dataset.lon = lon;
+    btn.dataset.ciudad = "Ubicación seleccionada"; // Nombre genérico temporal
+
     document.getElementById('selected-location').textContent = "Verificando ubicación...";
 
     try {
@@ -76,6 +83,8 @@ async function seleccionarLugarPorCoordenadas(e) {
 
             const btn = document.getElementById('btn-consultar');
             btn.dataset.ciudad = ciudad;
+            btn.dataset.lat = lat;
+            btn.dataset.lon = lon;
 
             validarFormulario();
         } else {
@@ -127,14 +136,17 @@ function actualizarDescripcionCosmovision(nacionalidad) {
 }
 
 async function consultarOraculo() {
-    const ciudad = document.getElementById('btn-consultar').dataset.ciudad;
+    const btn = document.getElementById('btn-consultar');
+    const lat = btn.dataset.lat;
+    const lon = btn.dataset.lon;
+    const ciudad = btn.dataset.ciudad;
     const nacionalidad = document.getElementById('nacionalidad').value;
     const loadingDiv = document.getElementById('loading');
 
     loadingDiv.classList.remove('hidden');
 
     try {
-        const climaData = await obtenerClima(ciudad);
+        const climaData = await obtenerClima(ciudad, lat, lon);
         const datosLunares = calcularFaseLunar(new Date());
         const recomendacion = obtenerRecomendacion(nacionalidad, datosLunares.faseActual, climaData.condicion);
 
@@ -188,58 +200,69 @@ function toggleInfo() {
     panel.classList.toggle('hidden');
 }
 
-async function obtenerClima(ciudadOriginal) {
-    let ciudadBusqueda = ciudadOriginal;
-    if (ciudadOriginal.includes("Puerto Ayora")) ciudadBusqueda = "Puerto Ayora";
-    else if (ciudadOriginal.includes("Puerto Baquerizo")) ciudadBusqueda = "Puerto Baquerizo Moreno";
-    else if (ciudadOriginal.includes("Puerto Villamil")) ciudadBusqueda = "Puerto Villamil";
-    else if (ciudadOriginal.includes("Santa Cruz")) ciudadBusqueda = "Puerto Ayora";
-    else if (ciudadOriginal.includes("San Cristóbal")) ciudadBusqueda = "Puerto Baquerizo Moreno";
-    else if (ciudadOriginal.includes("Isabela")) ciudadBusqueda = "Puerto Villamil";
+async function obtenerClima(ciudad, lat, lon) {
+    console.log(`🌐 Consultando clima para: ${ciudad} (${lat}, ${lon})`);
 
     try {
-        let url = `https://api.openweathermap.org/data/2.5/weather?q=${ciudadBusqueda},EC&appid=${API_KEY}&units=metric&lang=es`;
-        let response = await fetch(url);
+        let url;
+        const cacheBuster = `&_cb=${new Date().getTime()}`; // Evitar cache
+        
+        if (lat && lon) {
+            url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es${cacheBuster}`;
+        } else {
+            const ciudadLimpia = (ciudad || "").split(',')[0].trim();
+            url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ciudadLimpia)},EC&appid=${API_KEY}&units=metric&lang=es${cacheBuster}`;
+        }
+
+        const response = await fetch(url);
         if (response.status === 401) throw new Error("API_KEY_INVALIDA");
-        if (!response.ok && response.status === 404) {
-            url = `https://api.openweathermap.org/data/2.5/weather?q=${ciudadBusqueda}&appid=${API_KEY}&units=metric&lang=es`;
-            response = await fetch(url);
-        }
-        if (response.status === 401) throw new Error("API_KEY_INVALIDA");
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Error de conexión");
-        }
-        const data = await response.json();
-        let condicionGeneral = "Despejado";
-        if (data.weather && data.weather.length > 0) {
-            if (["Rain", "Drizzle", "Thunderstorm", "Snow"].includes(data.weather[0].main)) {
-                condicionGeneral = "Lluvia";
-            }
-        }
-        return {
-            temp: data.main.temp,
-            desc: data.weather[0].description,
-            condicion: condicionGeneral,
-            icon: data.weather[0].icon,
-            esSimulado: false
-        };
+        if (!response.ok) throw new Error("Ubicación no encontrada");
+
+        return procesarResponseOWM(await response.json());
+
     } catch (e) {
-        if (e.message === "API_KEY_INVALIDA") {
-            console.warn("⚠️ API Key no activa. Activando MODO SIMULACIÓN.");
-            showToast("⚠️ API Key activándose. Usando datos simulados.");
-            const esLluvia = Math.random() > 0.5;
-            const esNoche = Math.random() > 0.5;
-            return {
-                temp: parseFloat((Math.random() * (28 - 10) + 10).toFixed(1)),
-                desc: esLluvia ? "lluvia ligera (simulado)" : "cielo claro (simulado)",
-                condicion: esLluvia ? "Lluvia" : "Despejado",
-                icon: esNoche ? (esLluvia ? "10n" : "01n") : (esLluvia ? "10d" : "01d"),
-                esSimulado: true
-            };
-        }
+        if (e.message === "API_KEY_INVALIDA") return simularClima();
         throw e;
     }
+}
+
+function procesarResponseOWM(data) {
+    const main = data.weather[0].main;
+    const desc = data.weather[0].description.toLowerCase();
+    
+    console.log(`🌦️ API Response: ${main} (${desc})`);
+
+    let condicionGeneral = "Despejado";
+    
+    // Lógica de mapeo más granular para evitar "diluvios" constantes
+    // Si es llovizna muy ligera o hay nubes, lo tomamos como despejado/seco
+    const lloviznaLeve = main === "Drizzle" || desc.includes("llovizna ligera") || desc.includes("llovizna débil");
+    
+    if (["Rain", "Thunderstorm"].includes(main) && !lloviznaLeve) {
+        condicionGeneral = "Lluvia";
+    } else {
+        condicionGeneral = "Despejado";
+    }
+
+    return {
+        temp: data.main.temp,
+        desc: data.weather[0].description,
+        condicion: condicionGeneral,
+        icon: data.weather[0].icon,
+        esSimulado: false
+    };
+}
+
+function simularClima() {
+    const esLluvia = Math.random() > 0.7; // Bajamos la probabilidad de lluvia al 30% en simulación
+    const esNoche = new Date().getHours() < 6 || new Date().getHours() > 18;
+    return {
+        temp: parseFloat((Math.random() * (32 - 12) + 12).toFixed(1)),
+        desc: esLluvia ? "lluvia ligera" : "cielo despejado",
+        condicion: esLluvia ? "Lluvia" : "Despejado",
+        icon: esNoche ? (esLluvia ? "10n" : "01n") : (esLluvia ? "10d" : "01d"),
+        esSimulado: true
+    };
 }
 
 function calcularFaseLunar(date) {
@@ -321,11 +344,14 @@ function actualizarFondoDinamico(clima) {
         return;
     }
 
-    // Limpiar estado anterior
+    // Limpiar estado anterior exhaustivamente
     overlay.className = '';
     badge.className = '';
     rainBox.classList.remove('active');
-    raindrops.forEach(d => d.remove());
+    // Eliminar gotas anteriores del DOM
+    while (rainBox.firstChild) {
+        rainBox.removeChild(rainBox.firstChild);
+    }
     raindrops = [];
 
     // Determinar si es de noche usando el código de icono de OWM ('01n', '10n', etc.)

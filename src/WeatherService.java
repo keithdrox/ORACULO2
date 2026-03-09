@@ -25,13 +25,15 @@ public class WeatherService {
             weatherInfo.setMoonPhase(moonPhase);
             return weatherInfo;
         } catch (Exception e) {
-            System.err.println("Error al obtener datos del clima: " + e.getMessage());
+            System.err.println("Error al obtener datos del clima para " + city + ": " + e.getMessage());
             return new WeatherInfo("Error", 0.0, "Desconocida");
         }
     }
 
     private WeatherInfo fetchWeatherData(String city) throws IOException, InterruptedException {
-        String url = String.format("%s?q=%s,EC&appid=%s&units=metric", BASE_URL, city, API_KEY);
+        // Codificar el nombre de la ciudad para evitar errores con espacios o tildes
+        String encodedCity = java.net.URLEncoder.encode(city, java.nio.charset.StandardCharsets.UTF_8);
+        String url = String.format("%s?q=%s,EC&appid=%s&units=metric&lang=es", BASE_URL, encodedCity, API_KEY);
         
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -41,31 +43,49 @@ public class WeatherService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new IOException("Error en la respuesta de la API: " + response.statusCode());
+            // Intentar sin ,EC
+            String urlFallback = String.format("%s?q=%s&appid=%s&units=metric&lang=es", BASE_URL, encodedCity, API_KEY);
+            request = HttpRequest.newBuilder().uri(URI.create(urlFallback)).GET().build();
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() != 200) {
+                throw new IOException("Error API (Status: " + response.statusCode() + ")");
+            }
         }
 
         return parseWeatherJson(response.body());
     }
 
-    // Parseo manual simple para evitar dependencias externas como Jackson/Gson en este ejemplo
     private WeatherInfo parseWeatherJson(String json) {
-        String condition = extractJsonValue(json, "\"main\":\"", "\"");
-        if (condition == null) condition = extractJsonValue(json, "\"description\":\"", "\""); // Fallback
-        
-        // Extracción simplificada del clima principal (Rain, Clear, Clouds)
+        // Búsqueda más precisa del campo "main" del clima
+        // Se busca dentro del array "weather": [{"id":..., "main":"...", ...}]
+        int weatherIndex = json.indexOf("\"weather\":");
         String mainWeather = "Clear";
-        if (json.contains("\"main\":\"Rain\"")) mainWeather = "Rain";
-        else if (json.contains("\"main\":\"Clouds\"")) mainWeather = "Clouds";
-        else if (json.contains("\"main\":\"Drizzle\"")) mainWeather = "Rain";
-        else if (json.contains("\"main\":\"Thunderstorm\"")) mainWeather = "Rain";
-        
+        String description = "despejado";
+
+        if (weatherIndex != -1) {
+            if (json.contains("\"main\":\"Rain\"") || json.contains("\"main\":\"Drizzle\"") || json.contains("\"main\":\"Thunderstorm\"")) {
+                mainWeather = "Rain";
+            } else if (json.contains("\"main\":\"Clouds\"")) {
+                mainWeather = "Clouds";
+            }
+            
+            // Extraer descripción para mostrarla
+            String extractedDesc = extractJsonValue(json, "\"description\":\"", "\"");
+            if (extractedDesc != null) description = extractedDesc;
+        }
+
         double temp = 0.0;
+        // Buscar el objeto "main": { "temp": ... } que viene después de weather o al inicio
+        // Usamos una búsqueda específica para evitar confusión
         String tempStr = extractJsonValue(json, "\"temp\":", ",");
+        if (tempStr == null) tempStr = extractJsonValue(json, "\"temp\":", "}");
+        
         if (tempStr != null) {
             try {
-                temp = Double.parseDouble(tempStr);
+                temp = Double.parseDouble(tempStr.trim());
             } catch (NumberFormatException e) {
-                // Ignorar error de parseo
+                System.err.println("Error parseando temperatura: " + tempStr);
             }
         }
 

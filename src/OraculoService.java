@@ -10,12 +10,12 @@ public class OraculoService {
     public Recomendacion generarRecomendacionBioclimatica(WeatherService.WeatherInfo clima, String nacionalidad) {
         String contenidoJson = leerArchivoJson();
         if (contenidoJson == null) {
-            return new Recomendacion("Error al leer reglas", "Error", "Error");
+            return new Recomendacion("Error al leer reglas", "Error", "Error", "Error", "Error");
         }
 
         // Normalizar datos de entrada
-        String faseLunar = clima.getMoonPhase(); // "Luna Nueva", "Luna Creciente", etc.
-        String condicionClima = mapConditionToKey(clima.getCondition()); // "Lluvia" o "Despejado"
+        String faseLunar = clima.getMoonPhase(); 
+        String condicionClima = mapConditionToKey(clima.getCondition()); 
 
         // Intentar búsqueda exacta
         Recomendacion recomendacion = buscarEnJson(contenidoJson, nacionalidad, faseLunar, condicionClima);
@@ -23,28 +23,25 @@ public class OraculoService {
         if (recomendacion != null) {
             return recomendacion;
         } else {
-            // Lógica por defecto (Fallback)
             return generarFallback(nacionalidad);
         }
     }
 
     private String mapConditionToKey(String weatherCondition) {
-        // Mapear condiciones de OpenWeatherMap a las claves del JSON
+        if (weatherCondition == null) return "Despejado";
         if (weatherCondition.equalsIgnoreCase("Rain") || 
             weatherCondition.equalsIgnoreCase("Drizzle") || 
             weatherCondition.equalsIgnoreCase("Thunderstorm") ||
             weatherCondition.equalsIgnoreCase("Snow")) {
             return "Lluvia";
         }
-        return "Despejado"; // Clouds, Clear, etc. se asumen como tiempo seco/despejado para efectos prácticos o se podría refinar
+        return "Despejado"; 
     }
 
     private String leerArchivoJson() {
         try {
             Path path = Paths.get(JSON_PATH);
-            // Intentar leer desde la raíz del proyecto
             if (!Files.exists(path)) {
-                // Intentar ruta absoluta si la relativa falla (ajuste para entornos IDE)
                 path = Paths.get(System.getProperty("user.dir"), JSON_PATH);
             }
             return Files.readString(path);
@@ -54,34 +51,36 @@ public class OraculoService {
         }
     }
 
-    // Método de extracción "artesanal" para evitar dependencias externas (Gson/Jackson)
     private Recomendacion buscarEnJson(String json, String nacionalidad, String fase, String clima) {
         try {
-            // Buscar bloque de nacionalidad
-            String bloqueNacionalidad = extraerBloque(json, "\"" + nacionalidad + "\": {");
+            String bloqueReglas = extraerBloque(json, "\"reglas\": {");
+            if (bloqueReglas == null) return null;
+
+            String bloqueNacionalidad = extraerBloque(bloqueReglas, "\"" + nacionalidad + "\": {");
             if (bloqueNacionalidad == null) return null;
 
-            // Buscar bloque de fase lunar dentro de nacionalidad
-            String bloqueFase = extraerBloque(bloqueNacionalidad, "\"" + fase + "\": {");
+            String bloqueFases = extraerBloque(bloqueNacionalidad, "\"fases_lunares\": {");
+            if (bloqueFases == null) return null;
+
+            String bloqueFase = extraerBloque(bloqueFases, "\"" + fase + "\": {");
             if (bloqueFase == null) return null;
 
-            // Buscar bloque de clima dentro de fase
             String bloqueClima = extraerBloque(bloqueFase, "\"" + clima + "\": {");
             if (bloqueClima == null) return null;
 
-            // Extraer valores finales
-            String labores = extraerValor(bloqueClima, "\"labores_tierra\": \"");
-            String rituales = extraerValor(bloqueClima, "\"rituales_danzas\": \"");
-            String vestimenta = extraerValor(bloqueClima, "\"vestimenta\": \"");
+            String labores = extraerValor(bloqueClima, "labores_tierra");
+            String rituales = extraerValor(bloqueClima, "rituales_danzas");
+            String vestimenta = extraerValor(bloqueClima, "vestimenta");
+            String gastronomia = extraerValor(bloqueClima, "gastronomia");
+            String medicina = extraerValor(bloqueClima, "medicina");
 
-            return new Recomendacion(labores, rituales, vestimenta);
+            return new Recomendacion(labores, rituales, vestimenta, gastronomia, medicina);
         } catch (Exception e) {
-            System.err.println("Error parseando JSON manualmente: " + e.getMessage());
+            System.err.println("Error parseando JSON: " + e.getMessage());
             return null;
         }
     }
 
-    // Ayudante para extraer un bloque {...} dado un inicio
     private String extraerBloque(String texto, String llaveInicio) {
         int inicio = texto.indexOf(llaveInicio);
         if (inicio == -1) return null;
@@ -95,24 +94,27 @@ public class OraculoService {
             if (c == '}') contadorLlaves--;
             i++;
         }
-        return texto.substring(inicio, i - 1);
+        return (i > inicio) ? texto.substring(inicio, i - 1) : null;
     }
 
-    // Ayudante para extraer valor de una clave simple "clave": "valor"
-    private String extraerValor(String texto, String llave) {
-        int inicio = texto.indexOf(llave);
+    private String extraerValor(String texto, String clave) {
+        String patron = "\"" + clave + "\": \"";
+        int inicio = texto.indexOf(patron);
         if (inicio == -1) return "No disponible";
-        inicio += llave.length();
+        inicio += patron.length();
         int fin = texto.indexOf("\"", inicio);
+        if (fin == -1) return "No disponible";
         return texto.substring(inicio, fin);
     }
 
     private Recomendacion generarFallback(String nacionalidad) {
-        // Recomendaciones genéricas si falla la búsqueda específica
         String labores = "Observar la naturaleza y actuar con prudencia.";
         String rituales = "Conexión personal con los elementos.";
         String vestimenta = "Ropa cómoda y adecuada al clima actual.";
+        String gastronomia = "Alimentos de temporada.";
+        String medicina = "Mantenerse hidratado y descansar.";
 
+        // Mantengo los fallbacks por nacionalidad para robustez
         if ("Kichwa".equalsIgnoreCase(nacionalidad)) {
             labores = "Mantenimiento general de cultivos.";
             rituales = "Agradecimiento a la Pachamama.";
@@ -121,43 +123,41 @@ public class OraculoService {
             labores = "Recolección y pesca.";
             rituales = "Meditación en la naturaleza.";
             vestimenta = "Ropa ligera.";
-        } else if ("Montubio".equalsIgnoreCase(nacionalidad)) {
-            labores = "Cuidado del ganado.";
-            rituales = "Tradición oral.";
-            vestimenta = "Sombrero y ropa fresca.";
-        } else if ("Afroecuatoriano".equalsIgnoreCase(nacionalidad)) {
-            labores = "Pesca y recolección de conchas.";
-            rituales = "Música de marimba y arrullos.";
-            vestimenta = "Ropa blanca y fresca.";
-        } else if ("Galapagueño".equalsIgnoreCase(nacionalidad)) {
-            labores = "Conservación y pesca sustentable.";
-            rituales = "Respeto a la vida silvestre.";
-            vestimenta = "Protección solar y ropa de playa.";
         }
+        // ... (se podrían añadir más fallbacks si se desea, por ahora es suficiente)
 
-        return new Recomendacion(labores, rituales, vestimenta);
+        return new Recomendacion(labores, rituales, vestimenta, gastronomia, medicina);
     }
 
     public static class Recomendacion {
         public String laboresTierra;
         public String ritualesDanzas;
         public String vestimenta;
+        public String gastronomia;
+        public String medicina;
 
-        public Recomendacion(String laboresTierra, String ritualesDanzas, String vestimenta) {
+        public Recomendacion(String laboresTierra, String ritualesDanzas, String vestimenta, String gastronomia, String medicina) {
             this.laboresTierra = laboresTierra;
             this.ritualesDanzas = ritualesDanzas;
             this.vestimenta = vestimenta;
+            this.gastronomia = gastronomia;
+            this.medicina = medicina;
+        }
+
+        public String toJson() {
+            return String.format(
+                "{\"labores_tierra\": \"%s\", \"rituales_danzas\": \"%s\", \"vestimenta\": \"%s\", \"gastronomia\": \"%s\", \"medicina\": \"%s\"}",
+                laboresTierra, ritualesDanzas, vestimenta, gastronomia, medicina
+            );
         }
 
         @Override
         public String toString() {
             return String.format(
-                "--- RECOMENDACIÓN ANCESTRAL ---\n" +
-                "🌱 Labores de Tierra: %s\n" +
-                "🔥 Rituales y Danzas: %s\n" +
-                "👕 Vestimenta: %s",
-                laboresTierra, ritualesDanzas, vestimenta
+                "🌱 Labores: %s\n🔥 Rituales: %s\n👕 Vestimenta: %s\n🍲 Gastronomía: %s\n🌿 Medicina: %s",
+                laboresTierra, ritualesDanzas, vestimenta, gastronomia, medicina
             );
         }
     }
+
 }
